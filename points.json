@@ -1,0 +1,258 @@
+{
+  "1": {
+    "name": "Flash",
+    "points": 2
+  },
+  "2": {
+    "name": "Sunderer",
+    "points": 3
+  },
+  "3": {
+    "name": "Lightning",
+    "points": 5
+  },
+  "4": {
+    "name": "Magrider",
+    "points": 8
+  },
+  "5": {
+    "name": "Vanguard",
+    "points": 8
+  },
+  "6": {
+    "name": "Prowler",
+    "points": 8
+  },
+  "7": {
+    "name": "Scythe",
+    "points": 1000
+  },
+  "8": {
+    "name": "Reaver",
+    "points": 1000
+  },
+  "9": {
+    "name": "Mosquito",
+    "points": 1000
+  },
+  "10": {
+    "name": "Liberator",
+    "points": 2500
+  },
+  "11": {
+    "name": "Galaxy",
+    "points": 2000
+  },
+  "12": {
+    "name": "Harasser",
+    "points": 4
+  },
+  "13": {
+    "name": "Drop Pod",
+    "points": 0
+  },
+  "14": {
+    "name": "Valkyrie",
+    "points": 3000
+  },
+  "15": {
+    "name": "ANT",
+    "points": 3
+  },
+  "100": {
+    "name": "Xiphos Anti-Infantry Phalanx Turret",
+    "points": 0
+  },
+  "101": {
+    "name": "MANA Anti-Infantry Turret",
+    "points": 0
+  },
+  "102": {
+    "name": "MANA Anti-Vehicle Turret",
+    "points": 50
+  },
+  "103": {
+    "name": "Spitfire Auto-Turret",
+    "points": 0
+  },
+  "104": {
+    "name": "Spitfire Auto-Turret",
+    "points": 0
+  },
+  "105": {
+    "name": "AA SpitFire Turret",
+    "points": 0
+  },
+  "150": {
+    "name": "Aspis Anti-Aircraft Phalanx Turret ",
+    "points": 0
+  },
+  "151": {
+    "name": "Spear Anti-Vehicle Phalanx Turret",
+    "points": 0
+  },
+  "160": {
+    "name": "Spear Anti-Vehicle Tower",
+    "points": 0
+  },
+  "161": {
+    "name": "Aspis Anti-Aircraft Phalanx Tower",
+    "points": 0
+  },
+  "162": {
+    "name": "Xiphos Anti-Infantry Tower",
+    "points": 0
+  },
+  "163": {
+    "name": "Glaive IPC",
+    "points": 0
+  },
+  "1001": {
+    "name": "Flash",
+    "points": 2
+  },
+  "1002": {
+    "name": "Sunderer",
+    "points": 3
+  },
+  "1010": {
+    "name": "Liberator",
+    "points": 2500
+  },
+  "1011": {
+    "name": "Galaxy",
+    "points": 2000
+  },
+  "1013": {
+    "name": "Recon Drone",
+    "points": 0
+  },
+  "2006": {
+    "name": "Spear Anti-Vehicle Phalanx Turret",
+    "points": 0
+  },
+  "2007": {
+    "name": "Colossus",
+    "points": 6
+  },
+  "2008": {
+    "name": "Drop Pod",
+    "points": 0
+  },
+  "2009": {
+    "name": "Xiphos Anti-Infantry Phalanx Turret",
+    "points": 0
+  },
+  "2010": {
+    "name": "Flash XS-1",
+    "points": 0
+  },
+  "2011": {
+    "name": "Forward Station",
+    "points": 0
+  },
+  "2019": {
+    "name": "Bastion Fleet Carrier",
+    "points": 0
+  },
+  "2021": {
+    "name": "The Flail",
+    "points": 0
+  },
+  "2033": {
+    "name": "Javelin",
+    "points": 3
+  },
+  "2036": {
+    "name": "Pumpkin Patch",
+    "points": 0
+  },
+  "2039": {
+    "name": "Deliverer Prototype",
+    "points": 0
+  },
+  "2040": {
+    "name": "Wasp Prototype",
+    "points": 0
+  },
+  "2122": {
+    "name": "Mosquito Interceptor",
+    "points": 0
+  },
+  "2123": {
+    "name": "Reaver Interceptor",
+    "points": 0
+  },
+  "2124": {
+    "name": "Scythe Interceptor",
+    "points": 0
+  },
+  "2125": {
+    "name": "Javelin",
+    "points": 3
+  },
+  "2128": {
+    "name": "Spitfire Auto-Turret",
+    "points": 0
+  },
+  "2129": {
+    "name": "Javelin",
+    "points": 3
+  },
+  "2130": {
+    "name": "Reclaimed Sunderer",
+    "points": 0
+  },
+  "2131": {
+    "name": "Reclaimed Galaxy",
+    "points": 0
+  },
+  "2132": {
+    "name": "Reclaimed Valkyrie",
+    "points": 0
+  },
+  "2133": {
+    "name": "Reclaimed Magrider",
+    "points": 0
+  },
+  "2134": {
+    "name": "Reclaimed Vanguard",
+    "points": 0
+  },
+  "2135": {
+    "name": "Reclaimed Prowler",
+    "points": 0
+  },
+  "2136": {
+    "name": "Dervish",
+    "points": 0
+  },
+  "2137": {
+    "name": "Chimera",
+    "points": 8
+  },
+  "2139": {
+    "name": "Deliverer Prototype",
+    "points": 0
+  },
+  "2140": {
+    "name": "Lodestar Prototype",
+    "points": 0
+  },
+  "2141": {
+    "name": "Wasp Prototype",
+    "points": 0
+  },
+  "2142": {
+    "name": "Corsair",
+    "points": 4
+  },
+  "2144": {
+    "name": "Derelict Fleet Carrier",
+    "points": 0
+  },
+  "2145": {
+    "name": "Spitfire \"Prime Directive\" Auto-Turret",
+    "points": 0
+  }
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form action="/admin" method="post" enctype="multipart/form-data" id="form">
+     <div class="team_select" id="team1">
+    <label for="team1_name">Team 1 Name:</label>
+    <input type="text" id="team1_name" name="team1_name" required>
+<br>
+      <br>
+    <label for="team1_faction">Team 1 Faction:</label>
+    <select id="team1_faction" name="team1_faction">
+    <option value=1>VS</option>
+    <option value=2>NC</option>
+    <option value=3>TR</option>
+  </select><br><br>
+<br>
+    <p><strong>Team 1 Players:</strong></p>
+       <input class="single-checkbox" type="checkbox"  name="team1_players" value="PNxNaveedVS">PNxNaveedVS<br>
+          <input class="single-checkbox" type="checkbox"  name="team1_players" value="DIGTxPractice3VS">DIGTxPractice3VS<br>
+          <input class="single-checkbox" type="checkbox"  name="team1_players" value="MEGAxBIGJAEGERVS">MEGAxBIGJAEGERVS<br>
+          <input class="single-checkbox" type="checkbox" name="team1_players" value="R3STxAscenderVS">R3STxAscenderVS<br>
+          <input class="single-checkbox" type="checkbox" name="team1_players" value="PW3RxCrimsonFaustVS">PW3RxCrimsonFaustVS<br>
+          <input class="single-checkbox" type="checkbox" name="team1_players" value="C4CRxShadowguardNS">C4CRxShadowguardNS<br>
+     </div>
+    <div class="team_select" id="team2">
+    <label for="team2_name">Team 2 Name:</label>
+    <input type="text" id="team2_name" name="team2_name" required>
+<br>
+      <br>
+    <label for="team2_faction">Team 2 Faction:</label>
+    <select id="team2_faction" name="team2_faction">
+    <option value=1>VS</option>
+    <option value=2>NC</option>
+    <option value=3>TR</option>
+  </select><br><br>
+<br>
+    <p><strong>Team 2 Players:</strong></p>
+       <input class="single-checkbox" type="checkbox"  name="team2_players" value="diksxdylratTR">diksxdylratTR<br>
+          <input class="single-checkbox" type="checkbox"  name="team2_players" value="MEGAxBIGJAEGERTR">MEGAxBIGJAEGERTR<br>
+          <input class="single-checkbox" type="checkbox"  name="team2_players" value="PSBAdm02TR">PSBAdm02TR<br>
+          <input class="single-checkbox" type="checkbox" name="team2_players" value="PW3RxAzagarxTR">PW3RxAzagarxTR<br>
+          <input class="single-checkbox" type="checkbox" name="team2_players" value="PSBx0923TR">PSBx0923TR<br>
+          <input class="single-checkbox" type="checkbox" name="team2_players" value="SHTRxswcloneTR">SHTRxswcloneTR<br>
+    </div>
+    <button type="submit" id="submit">Submit</button>
+  </form>
+<script>
+    var limit = 6;
+    $('input.single-checkbox').on('change', function (evt) {
+        if ($(this).siblings(':checked').length >= limit) {
+            this.checked = false;
+        }
+    });
+    </script>
+    </body>
+    </html>
