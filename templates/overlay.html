@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+ <div><span id="team1_name"></span>: <span id="team1_points"></span>  <span id="time"></span>  <span id="team2_name"></span>: <span id="team2_points"></span></div>
+</body>
+
+<script>
+function startTimer(duration, display) {
+    var start = Date.now(),
+        diff,
+        minutes,
+        seconds;
+    function timer() {
+        // get the number of seconds that have elapsed since
+        // startTimer() was called
+        diff = duration - (((Date.now() - start) / 1000) | 0);
+
+        // does the same job as parseInt truncates the float
+        minutes = (diff / 60) | 0;
+        seconds = (diff % 60) | 0;
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (diff <= 0) {
+            // add one second so that the count down starts at the full duration
+            // example 05:00 not 04:59
+            start = Date.now() + 1000;
+        }
+    };
+    // we don't want to wait a full second before the timer starts
+    timer();
+    setInterval(timer, 1000);
+}
+
+
+</script>
+<script>
+    const ws = new WebSocket(`ws://127.0.0.1:8080/ws`);
+    //console.log(JSON.parse("{\"teams\": [{\"name\": \"Test1\", \"score\": 0, \"faction\": 1}, {\"name\": \"Test2\", \"score\": 0, \"faction\": 2}], \"time_limit\": 900}"))
+    ws.onmessage = (event) => {
+        let msg = JSON.parse(event.data);
+
+
+        if (msg.start){
+            msg = JSON.parse(msg.start)
+            console.log(msg)
+            console.log((msg.time_limit))
+            console.log(parseInt(msg.time_limit))
+            display = document.querySelector('#time');
+            startTimer(parseInt(msg.time_limit), display);
+        }
+        document.querySelector('#team1_name').textContent=msg.teams[0].name
+        document.querySelector('#team1_points').textContent=msg.teams[0].score
+        document.querySelector('#team2_name').textContent=msg.teams[1].name
+        document.querySelector('#team2_points').textContent=msg.teams[1].score
+
+    }
+
+
+</script>
+</html>
