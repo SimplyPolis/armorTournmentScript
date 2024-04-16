@@ -2,7 +2,6 @@ from __future__ import annotations
 import asyncio
 import enum
 from typing import Optional
-
 import auraxium
 from auraxium import event, ps2
 
@@ -10,24 +9,34 @@ import itertools
 import datetime
 import csv
 import json
-from quart import copy_current_websocket_context, Quart, websocket, request, jsonify, render_template
+from quart import copy_current_websocket_context, Quart, websocket, request, jsonify, render_template, g
 from logging import getLogger
 from quart.logging import default_handler
+from quart_auth import basic_auth_required, QuartAuth
 import re
+import secrets
+import aiosqlite
 
 app = Quart(__name__)
+app.config["QUART_AUTH_BASIC_USERNAME"] = "hejbl"
+app.config["QUART_AUTH_BASIC_PASSWORD"] = "out"
+app.secret_key = secrets.token_urlsafe(16)
+
+db = None
 
 points = json.load(open('points.json'))
+new_points = points.copy()
 cached_response = None
 game = None
-event_dicts = []
+
 initialize_request_re = re.compile(r"^team(?P<id>\d+)_(?P<field>.+)")
 initialize_lock = asyncio.Lock()
 initialize_cond = asyncio.Condition()
 cache_lock = asyncio.Lock()
 game_state_queue = asyncio.Queue()
 game_task = None
-start_time = datetime.datetime.now().timestamp()
+table_name = None
+
 
 class Faction(enum.IntEnum):
     VS = 1
@@ -39,7 +48,7 @@ class Faction(enum.IntEnum):
 class Team:
     id_iter = itertools.count(start=0)
 
-    def __init__(self, name: str, members: dict[str:int], faction: Faction):
+    def __init__(self, name: str, members: dict[int:str], faction: Faction):
         self.members = members
         self.score = 0
         self.name = name
@@ -50,21 +59,27 @@ class Team:
         if isinstance(other, Team):
             return self.id == other.id
 
+    def __ne__(self, other):
+        if isinstance(other, Team):
+            return self.id != other.id
+
     def overlayAttributes(self):
         return {"name": self.name, "score": self.score, "faction": self.faction}
 
     def scorePoints(self, score: int):
         self.score += score
 
-    def getPlayers(self) -> dict[str:int]:
-        return {member: self.id for member in self.members.values()}
+    def getPlayers(self) -> dict[int:int]:
+        return {member: self.id for member in self.members.keys()}
 
 
 class Game:
-    def __init__(self, teams: list[(str, dict[str:int], Faction)]):
+    def __init__(self, teams: list[(str, dict[int:str], Faction)]):
         self.teams = [Team(*team) for team in teams]
         self.players = {}
+        self.names = {}
         for team in self.teams:
+            self.names.update(team.members)
             self.players.update(team.getPlayers())
 
     def __repr__(self):
@@ -77,9 +92,6 @@ class Game:
         if (player := self.players.get(id, None)) is None:
             return None
         return self.teams[player]
-
-    def getPlayer(self) -> list[int]:
-        return self.players.values()
 
     @classmethod
     async def initializeTeams(cls, teams: list[(str, list[str], Faction)]) -> Game:
@@ -95,6 +107,7 @@ class Game:
 
 async def track_vehicle_events():
     global game_task
+    global db
     game_task = asyncio.current_task()
     client = auraxium.event.EventClient(service_id='s:MEGABIGSTATS')
     async with initialize_lock:
@@ -102,8 +115,10 @@ async def track_vehicle_events():
             while (not game):
                 await initialize_cond.wait()
         print("Ready")
+        print(game.players.keys())
+        print(game.players.values())
 
-        @client.trigger(event.VehicleDestroy, characters=game.players.values())
+        @client.trigger(event.VehicleDestroy, characters=game.players.keys())
         async def track_kill(evt: event.VehicleDestroy):
 
             victim_id = evt.character_id
@@ -114,18 +129,25 @@ async def track_vehicle_events():
             victim_vehicle = evt.vehicle_id
 
             # Ignore deaths not caused by enemy players
-            if not victim_team or not killer_team or killer_id == 0 or victim_id == killer_id:
+
+            if not victim_team or not killer_team or killer_id == 0 or victim_id == killer_id or points.get(
+                    str(victim_vehicle), {"banned": True}) or points.get(str(killer_vehicle), {"banned": True}):
                 pass
+            elif killer_team != victim_team:
+                killer_team.scorePoints(points[str(victim_vehicle)]["points"])
             elif killer_team == victim_team:
                 killer_team.scorePoints(-(points[str(victim_vehicle)]["points"]))
-            else:
-                killer_team.scorePoints(points[str(victim_vehicle)]["points"])
-            event_dict = {"Timestamp": evt.timestamp.isoformat(),
-                          "Killer": killer_id, "Victim": victim_id,
-                          "Killer Vehicle": points.get(str(killer_vehicle), {"name": "None"})["name"],
-                          "Victim Vehicle": points.get(str(victim_vehicle), {"name": "None"})["name"]}
-            event_dict.update(json.loads(game))
-            event_dicts.append(event_dict)
+
+            print("here")
+            await game_state_queue.put(repr(game))
+            await db.execute(
+                f"""INSERT INTO {table_name} (timestamp,killer,victim,killer_vehicle,victim_vehicle,gamestate ) VALUES (?,?,?,?,?,?)""",
+                [evt.timestamp.isoformat(),
+                 game.names.get(killer_id, killer_id), game.names.get(victim_id, victim_id),
+                 points.get(str(killer_vehicle), {"name": "None"})["name"],
+                 points.get(str(victim_vehicle), {"name": "None"})["name"],
+                 repr(game)])
+            await db.commit()
 
 
 async def input():
@@ -171,10 +193,13 @@ async def ws():
 
 
 @app.route('/admin', methods=["GET", "POST"])
+@basic_auth_required()
 async def initializeGame():
     if request.method == "GET":
         return await render_template("admin.html")
     global game
+    global table_name
+    global db
     req_dict = await request.form
     teams_dict = {}
     for name, value in req_dict.lists():
@@ -190,25 +215,33 @@ async def initializeGame():
         game_list.append(
             (teams_dict[key]["name"][0], teams_dict[key]["players"], Faction(int(teams_dict[key]["faction"][0]))))
     async with initialize_lock:
+
+        table_name = f"log_{str(datetime.datetime.now().timestamp()).replace('.', '')}"
+        await db.execute(
+            f"""CREATE TABLE {table_name} (
+            timestamp DATETIME,
+  			killer TEXT,
+  			victim TEXT,
+  			killer_vehicle NUMERIC,
+			victim_vehicle NUMERIC,
+  			gamestate TEXT)""")
         game = await Game.initializeTeams(game_list)
         async with initialize_cond:
             initialize_cond.notify()
     return jsonify(success=True)
 
 
-
 @app.route('/startGame', methods=["POST"])
 async def startGame():
     loop = asyncio.get_event_loop()
+
     await loop.create_task(track_vehicle_events())
     return jsonify(success=True)
-
 
 
 @app.route('/endGame', methods=["POST"])
 async def endGame():
     return jsonify(success=True) if endGameCallback() else jsonify(success=False)
-
 
 
 def endGameCallback() -> bool:
@@ -221,14 +254,19 @@ def endGameCallback() -> bool:
         return True
 
 
+async def openDB():
+    global db
+    db = await aiosqlite.connect("game.db")
+
+
+async def closeDB():
+    global db
+    await db.close()
+
+
 if __name__ == '__main__':
     try:
+        asyncio.run(openDB())
         app.run(host="localhost", port=8080)
-        getLogger(app.name).removeHandler(default_handler)
-    except KeyboardInterrupt:
-        with open(f"log_{start_time}.csv", 'w', newline='') as csvfile:
-            fieldnames = event_dicts[0].keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in event_dicts:
-                writer.writerow(row)
+    finally:
+        asyncio.run(closeDB())

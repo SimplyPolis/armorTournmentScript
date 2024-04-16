@@ -1,258 +1,322 @@
 {
   "1": {
     "name": "Flash",
-    "points": 2
+    "points": 2,
+    "banned": false
   },
   "2": {
     "name": "Sunderer",
-    "points": 3
+    "points": 3,
+    "banned": false
   },
   "3": {
     "name": "Lightning",
-    "points": 5
+    "points": 5,
+    "banned": false
   },
   "4": {
     "name": "Magrider",
-    "points": 8
+    "points": 8,
+    "banned": false
   },
   "5": {
     "name": "Vanguard",
-    "points": 8
+    "points": 8,
+    "banned": false
   },
   "6": {
     "name": "Prowler",
-    "points": 8
+    "points": 8,
+    "banned": false
   },
   "7": {
     "name": "Scythe",
-    "points": 1000
+    "points": 0,
+    "banned": true
   },
   "8": {
     "name": "Reaver",
-    "points": 1000
+    "points": 0,
+    "banned": true
   },
   "9": {
     "name": "Mosquito",
-    "points": 1000
+    "points": 0,
+    "banned": true
   },
   "10": {
     "name": "Liberator",
-    "points": 2500
+    "points": 0,
+    "banned": true
   },
   "11": {
     "name": "Galaxy",
-    "points": 2000
+    "points": 0,
+    "banned": true
   },
   "12": {
     "name": "Harasser",
-    "points": 4
+    "points": 4,
+    "banned": false
   },
   "13": {
     "name": "Drop Pod",
-    "points": 0
+    "points": 0,
+    "banned": false
   },
   "14": {
     "name": "Valkyrie",
-    "points": 3000
+    "points": 0,
+    "banned": true
   },
   "15": {
     "name": "ANT",
-    "points": 3
+    "points": 3,
+    "banned": false
   },
   "100": {
     "name": "Xiphos Anti-Infantry Phalanx Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "101": {
     "name": "MANA Anti-Infantry Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "102": {
     "name": "MANA Anti-Vehicle Turret",
-    "points": 50
+    "points": 0,
+    "banned": true
   },
   "103": {
     "name": "Spitfire Auto-Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "104": {
     "name": "Spitfire Auto-Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "105": {
     "name": "AA SpitFire Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "150": {
     "name": "Aspis Anti-Aircraft Phalanx Turret ",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "151": {
     "name": "Spear Anti-Vehicle Phalanx Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "160": {
     "name": "Spear Anti-Vehicle Tower",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "161": {
     "name": "Aspis Anti-Aircraft Phalanx Tower",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "162": {
     "name": "Xiphos Anti-Infantry Tower",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "163": {
     "name": "Glaive IPC",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "1001": {
     "name": "Flash",
-    "points": 2
+    "points": 2,
+    "banned": false
   },
   "1002": {
     "name": "Sunderer",
-    "points": 3
+    "points": 3,
+    "banned": false
   },
   "1010": {
     "name": "Liberator",
-    "points": 2500
+    "points": 0,
+    "banned": true
   },
   "1011": {
     "name": "Galaxy",
-    "points": 2000
+    "points": 0,
+    "banned": true
   },
   "1013": {
     "name": "Recon Drone",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2006": {
     "name": "Spear Anti-Vehicle Phalanx Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2007": {
     "name": "Colossus",
-    "points": 6
+    "points": 6,
+    "banned": false
   },
   "2008": {
     "name": "Drop Pod",
-    "points": 0
+    "points": 0,
+    "banned": false
   },
   "2009": {
     "name": "Xiphos Anti-Infantry Phalanx Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2010": {
     "name": "Flash XS-1",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2011": {
     "name": "Forward Station",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2019": {
     "name": "Bastion Fleet Carrier",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2021": {
     "name": "The Flail",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2033": {
     "name": "Javelin",
-    "points": 3
+    "points": 3,
+    "banned": false
   },
   "2036": {
     "name": "Pumpkin Patch",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2039": {
     "name": "Deliverer Prototype",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2040": {
     "name": "Wasp Prototype",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2122": {
     "name": "Mosquito Interceptor",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2123": {
     "name": "Reaver Interceptor",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2124": {
     "name": "Scythe Interceptor",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2125": {
     "name": "Javelin",
-    "points": 3
+    "points": 3,
+    "banned": false
   },
   "2128": {
     "name": "Spitfire Auto-Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2129": {
     "name": "Javelin",
-    "points": 3
+    "points": 3,
+    "banned": false
   },
   "2130": {
     "name": "Reclaimed Sunderer",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2131": {
     "name": "Reclaimed Galaxy",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2132": {
     "name": "Reclaimed Valkyrie",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2133": {
     "name": "Reclaimed Magrider",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2134": {
     "name": "Reclaimed Vanguard",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2135": {
     "name": "Reclaimed Prowler",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2136": {
     "name": "Dervish",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2137": {
     "name": "Chimera",
-    "points": 8
+    "points": 8,
+    "banned": false
   },
   "2139": {
     "name": "Deliverer Prototype",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2140": {
     "name": "Lodestar Prototype",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2141": {
     "name": "Wasp Prototype",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2142": {
     "name": "Corsair",
-    "points": 4
+    "points": 4,
+    "banned": false
   },
   "2144": {
     "name": "Derelict Fleet Carrier",
-    "points": 0
+    "points": 0,
+    "banned": true
   },
   "2145": {
     "name": "Spitfire \"Prime Directive\" Auto-Turret",
-    "points": 0
+    "points": 0,
+    "banned": true
   }
 }
