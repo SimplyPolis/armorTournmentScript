@@ -26,7 +26,7 @@ db = None
 
 points = json.load(open('points.json'))
 new_points = points.copy()
-cached_response = None
+
 game = None
 
 initialize_request_re = re.compile(r"^team(?P<id>\d+)_(?P<field>.+)")
@@ -34,8 +34,10 @@ initialize_event = asyncio.Event()
 cache_lock = asyncio.Lock()
 game_state_queue = asyncio.Queue()
 game_start_event = asyncio.Event()
+cached_response = None
 game_task = None
 table_name = None
+game_time = 900
 
 
 class Faction(enum.IntEnum):
@@ -74,8 +76,7 @@ class Team:
 
 
 class Game:
-    def __init__(self, teams: list[(str, dict[int:str], Faction)], time_limit: int):
-        self.time_limit = time_limit
+    def __init__(self, teams: list[(str, dict[int:str], Faction)]):
         self.teams = [Team(*team) for team in teams]
         self.players = {}
         self.names = {}
@@ -83,8 +84,8 @@ class Game:
             self.names.update(team.members)
             self.players.update(team.getPlayers())
 
-    def __repr__(self):
-        return json.dumps({"teams": [team.overlayAttributes() for team in self.teams], "time_limit": self.time_limit})
+    def to_dict(self):
+        return {"teams": [team.overlayAttributes() for team in self.teams]}
 
     def __str__(self):
         return "\n".join([f"{team.name}: {team.score}" for team in self.teams])
@@ -95,7 +96,7 @@ class Game:
         return self.teams[player]
 
     @classmethod
-    async def initializeTeams(cls, teams: list[(str, list[str], Faction)], time_limit: int) -> Game:
+    async def initializeTeams(cls, teams: list[(str, list[str], Faction)]) -> Game:
         teams_with_ids = []
         async with auraxium.Client(service_id='s:MEGABIGSTATS') as client:
             for team in teams:
@@ -103,20 +104,22 @@ class Game:
                 for player in team[1]:
                     players.update({(await client.get_by_name(ps2.Character, player)).id: player})
                 teams_with_ids.append((team[0], players, team[2]))
-        return cls(teams_with_ids, time_limit)
+        return cls(teams_with_ids)
 
 
 async def gameLoop():
     global game_task
+
     global db
     game_task = asyncio.current_task()
     client = auraxium.event.EventClient(service_id='s:MEGABIGSTATS')
 
+    await game_start_event.wait()
     print("Ready")
-    await initialize_event.wait()
 
     @client.trigger(event.VehicleDestroy, characters=game.players.keys())
     async def trackVehicleEvents(evt: event.VehicleDestroy):
+        global cached_response
 
         victim_id = evt.character_id
         killer_id = evt.attacker_character_id
@@ -134,61 +137,34 @@ async def gameLoop():
             killer_team.scorePoints(points[str(victim_vehicle)]["points"])
         elif killer_team == victim_team:
             killer_team.scorePoints(-(points[str(victim_vehicle)]["points"]))
-        await game_state_queue.put(repr(game))
+
+        async with cache_lock:
+            cached_response = game.to_dict()
         await db.execute(
             f"""INSERT INTO {table_name} (timestamp,killer,victim,killer_vehicle,victim_vehicle,gamestate ) VALUES (?,?,?,?,?,?)""",
             [evt.timestamp.isoformat(),
              game.names.get(killer_id, killer_id), game.names.get(victim_id, victim_id),
              points.get(str(killer_vehicle), {"name": "None"})["name"],
              points.get(str(victim_vehicle), {"name": "None"})["name"],
-             repr(game)])
+             str(game)])
         await db.commit()
 
 
-async def startDisplay():
-    await game_start_event.wait()
-    await websocket.send_json({"start":repr(game)})
-
-
-async def onVehicleEvent():
+async def update_queue():
     global cached_response
     await game_start_event.wait()
-    while True:
-        element = await game_state_queue.get()
+    for i in range(game_time, -1, -1):
+        await asyncio.sleep(1)
         async with cache_lock:
-            cached_response = element
-
-        await websocket.send(element)
-
-
-async def echoCache():
-    global cached_response
-    await game_start_event.wait()
-    while True:
-        await asyncio.sleep(5)
-        async with cache_lock:
-            if not cached_response:
-                continue
-            await websocket.send(cached_response)
+            await game_state_queue.put(dict(cached_response, **{"time": i}))
+    endGameCallback()
 
 
 @app.websocket('/ws')
 async def ws():
-    start_display_task = asyncio.ensure_future(
-        copy_current_websocket_context(startDisplay)(),
-    )
-    on_vehicle_event_task = asyncio.ensure_future(
-        copy_current_websocket_context(onVehicleEvent)(),
-    )
-    echo_cache_task = asyncio.ensure_future(
-        copy_current_websocket_context(echoCache)(),
-    )
-    try:
-        await asyncio.gather(start_display_task, on_vehicle_event_task, echo_cache_task)
-    finally:
-        start_display_task.cancel()
-        on_vehicle_event_task.cancel()
-        echo_cache_task.cancel()
+    await game_start_event.wait()
+    while True:
+        await websocket.send_json(await game_state_queue.get())
 
 
 @app.route('/', methods=["GET"])
@@ -228,7 +204,7 @@ async def initializeGame():
         killer_vehicle NUMERIC,
         victim_vehicle NUMERIC,
         gamestate TEXT)""")
-    game = await Game.initializeTeams(game_list, 900)
+    game = await Game.initializeTeams(game_list)
     initialize_event.set()
     return jsonify(success=True)
 
@@ -243,10 +219,12 @@ async def unInitialize():
 async def startGame():
     if not initialize_event.is_set():
         return jsonify(success=False)
-
+    global cached_response
+    cached_response = game.to_dict()
+    asyncio.create_task(update_queue())
+    asyncio.create_task(gameLoop())
     game_start_event.set()
-    loop = asyncio.get_event_loop()
-    await loop.create_task(gameLoop())
+
     return jsonify(success=True)
 
 

@@ -7,6 +7,10 @@
 </head>
 <body>
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+<form target="dummyframe" action="/startMatch" method="post" enctype="multipart/form-data" id="startForm">
+    <button type="submit" id="startMatch">startMatch</button>
+</form>
+
 <form target="dummyframe" action="/admin" method="post" enctype="multipart/form-data" id="form">
      <div class="team_select" id="team1">
     <label for="team1_name">Team 1 Name:</label>
@@ -44,15 +48,15 @@
   </form>
  <script>
     $(function () {
-        const url = 'https://wt.honu.pw/api/character/online?worldID=1';
+        const url = 'https://wt.honu.pw/api/character/online?worldID=19';
         // Populate dropdown with list of provinces
         $.getJSON(url, function (data) {
             $.each(data, function (key, entry) {
                 if (entry.factionID == $('#team1_faction').val() ||  entry.factionID ==4){
-                     $('#team1_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team1_players" value="${entry.name}">${entry.name}<br>`);
+                     $('#team1_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team1_players" value="${entry.name}">[${entry.outfitTag}]${entry.name}<br>`);
                 }
                  if (entry.factionID == $('#team2_faction').val() ||  entry.factionID ==4){
-                     $('#team2_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team2_players" value="${entry.name}">${entry.name}<br>`);
+                     $('#team2_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team2_players" value="${entry.name}">[${entry.outfitTag}]${entry.name}<br>`);
                 }
 
 
