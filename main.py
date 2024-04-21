@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import enum
+from functools import wraps
 from typing import Optional
 import auraxium
 from auraxium import event, ps2
@@ -32,11 +33,12 @@ game = None
 initialize_request_re = re.compile(r"^team(?P<id>\d+)_(?P<field>.+)")
 initialize_event = asyncio.Event()
 cache_lock = asyncio.Lock()
-game_state_queue = asyncio.Queue()
 game_start_event = asyncio.Event()
+web_sockets = set()
 cached_response = None
 game_task = None
 table_name = None
+connected_websockets = set()
 game_time = 900
 
 
@@ -150,21 +152,40 @@ async def gameLoop():
         await db.commit()
 
 
+
+
+
+def collect_websocket(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        global connected_websockets
+        queue = asyncio.Queue()
+        connected_websockets.add(queue)
+        try:
+            return await func(queue, *args, **kwargs)
+        finally:
+            connected_websockets.remove(queue)
+    return wrapper
+
+
 async def update_queue():
+    global connected_websockets
     global cached_response
     await game_start_event.wait()
     for i in range(game_time, -1, -1):
         await asyncio.sleep(1)
         async with cache_lock:
-            await game_state_queue.put(dict(cached_response, **{"time": i}))
+            for queue in connected_websockets:
+                await queue.put(dict(cached_response, **{"time": i}))
     endGameCallback()
 
 
 @app.websocket('/ws')
-async def ws():
-    await game_start_event.wait()
+@collect_websocket
+async def ws(queue):
+    await websocket.accept()
     while True:
-        await websocket.send_json(await game_state_queue.get())
+        await websocket.send_json(await queue.get())
 
 
 @app.route('/', methods=["GET"])
@@ -180,6 +201,7 @@ async def initializeGame():
     global game
     global table_name
     global db
+    global connected_websockets
     req_dict = await request.form
     teams_dict = {}
     for name, value in req_dict.lists():
@@ -205,7 +227,10 @@ async def initializeGame():
         victim_vehicle NUMERIC,
         gamestate TEXT)""")
     game = await Game.initializeTeams(game_list)
+    for queue in connected_websockets:
+        await queue.put(dict(game.to_dict(), **{"time": game_time}))
     initialize_event.set()
+
     return jsonify(success=True)
 
 

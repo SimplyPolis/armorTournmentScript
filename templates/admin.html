@@ -1,62 +1,66 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="../static/admin.css" type="text/css">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
-<form target="dummyframe" action="/startMatch" method="post" enctype="multipart/form-data" id="startForm">
-    <button type="submit" id="startMatch">startMatch</button>
+<form target="dummyframe" action="/startGame" method="post" enctype="multipart/form-data" id="startForm">
+    <button type="submit" id="Start Game">Start Match</button>
+</form>
+<form target="dummyframe" action="/endGame" method="post" enctype="multipart/form-data" id="endGame">
+    <button type="submit" id="End Game">End Match</button>
 </form>
 
 <form target="dummyframe" action="/admin" method="post" enctype="multipart/form-data" id="form">
-     <div class="team_select" id="team1">
-    <label for="team1_name">Team 1 Name:</label>
-    <input type="text" id="team1_name" name="team1_name" required>
-<br>
-      <br>
-    <label for="team1_faction">Team 1 Faction:</label>
-    <select id="team1_faction" name="team1_faction">
-    <option value=1>VS</option>
-    <option value=2>NC</option>
-    <option value=3>TR</option>
-  </select><br><br>
-<br>
-    <p><strong>Team 1 Players:</strong></p>
-         <div id="team1_player_select">
-    </div>
-     </div>
-    <div class="team_select" id="team2">
-    <label for="team2_name">Team 2 Name:</label>
-    <input type="text" id="team2_name" name="team2_name" required>
-<br>
-      <br>
-    <label for="team2_faction">Team 2 Faction:</label>
-    <select id="team2_faction" name="team2_faction">
-    <option value=1>VS</option>
-    <option value=2>NC</option>
-    <option value=3>TR</option>
-  </select><br><br>
-<br>
-    <p><strong>Team 2 Players:</strong></p>
-        <div id="team2_player_select">
-    </div>
+    <div class="team_select" id="team1">
+        <label for="team1_name">Team 1 Name:</label>
+        <input type="text" id="team1_name" name="team1_name" required>
+        <br>
+        <br>
+        <label for="team1_faction">Team 1 Faction:</label>
+        <select id="team1_faction" name="team1_faction">
+            <option value=1>VS</option>
+            <option value=2>NC</option>
+            <option value=3>TR</option>
+        </select><br><br>
+        <br>
+        <p><strong>Team 1 Players:</strong></p>
+        <div id="team1_player_select">
         </div>
-    <button type="submit" id="submit">Submit</button>
-  </form>
- <script>
+    </div>
+    <div class="team_select" id="team2">
+        <label for="team2_name">Team 2 Name:</label>
+        <input type="text" id="team2_name" name="team2_name" required>
+        <br>
+        <br>
+        <label for="team2_faction">Team 2 Faction:</label>
+        <select id="team2_faction" name="team2_faction">
+            <option value=1>VS</option>
+            <option value=2>NC</option>
+            <option value=3>TR</option>
+        </select><br><br>
+        <br>
+        <p><strong>Team 2 Players:</strong></p>
+        <div id="team2_player_select">
+        </div>
+    </div>
+    <button type="submit" id="submit">Initialize Teams</button>
+</form>
+<script>
     $(function () {
         const url = 'https://wt.honu.pw/api/character/online?worldID=19';
         // Populate dropdown with list of provinces
         $.getJSON(url, function (data) {
             $.each(data, function (key, entry) {
-                if (entry.factionID == $('#team1_faction').val() ||  entry.factionID ==4){
-                     $('#team1_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team1_players" value="${entry.name}">[${entry.outfitTag}]${entry.name}<br>`);
+                if (entry.factionID == $('#team1_faction').val() || entry.factionID == 4) {
+                    $('#team1_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team1_players" value="${entry.name}">[${entry.outfitTag}]${entry.name}<br>`);
                 }
-                 if (entry.factionID == $('#team2_faction').val() ||  entry.factionID ==4){
-                     $('#team2_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team2_players" value="${entry.name}">[${entry.outfitTag}]${entry.name}<br>`);
+                if (entry.factionID == $('#team2_faction').val() || entry.factionID == 4) {
+                    $('#team2_player_select').append(`<input class="single-checkbox" type="checkbox"  name="team2_players" value="${entry.name}">[${entry.outfitTag}]${entry.name}<br>`);
                 }
 
 
@@ -73,6 +77,6 @@
             this.checked = false;
         }
     });
-    </script>
-    </body>
-    </html>
+</script>
+</body>
+</html>

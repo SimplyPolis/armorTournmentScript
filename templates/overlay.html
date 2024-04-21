@@ -1,26 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
+<link rel="stylesheet" href="../static/overlay.css" type="text/css">
 <body>
- <div><span id="team1_name"></span>: <span id="team1_points"></span>  <span id="time"></span>  <span id="team2_name"></span>: <span id="team2_points"></span></div>
+<div class="display">
+    <span class="points" id="team1_points">0</span><span class="name" id="team1_name"></span><span
+        id="time">15:00</span><span class="name" id="team2_name"></span><span class="points"
+                                                                                  id="team2_points">0</span>
+
+</div>
 </body>
 
+
 <script>
+    const factions = ["NULL", "VS", "NC", "TR", "NSO"]
+
+    function swapFaction(name, faction) {
+        if (name.hasClass(faction)) {
+            return;
+        } else {
+            name.removeClass("TR");
+            name.removeClass("VS");
+            name.removeClass("NS");
+            name.addClass(faction)
+        }
+    }
 
 
 
-</script>
-<script>
     const ws = new WebSocket(`ws://127.0.0.1:8080/ws`);
-    //console.log(JSON.parse("{\"teams\": [{\"name\": \"Test1\", \"score\": 0, \"faction\": 1}, {\"name\": \"Test2\", \"score\": 0, \"faction\": 2}], \"time_limit\": 900}"))
     ws.onmessage = (event) => {
         let msg = JSON.parse(event.data);
 
-
-        console.log(msg)
 
         minutes = (msg.time / 60) | 0;
         seconds = (msg.time % 60) | 0;
@@ -29,10 +44,14 @@
         seconds = seconds < 10 ? "0" + seconds : seconds;
 
         document.querySelector('#time').textContent = minutes + ":" + seconds;
-        document.querySelector('#team1_name').textContent=msg.teams[0].name
-        document.querySelector('#team1_points').textContent=msg.teams[0].score
-        document.querySelector('#team2_name').textContent=msg.teams[1].name
-        document.querySelector('#team2_points').textContent=msg.teams[1].score
+        document.querySelector('#team1_name').textContent = msg.teams[0].name
+        document.querySelector('#team1_points').textContent = msg.teams[0].score
+        document.querySelector('#team2_name').textContent = msg.teams[1].name
+        document.querySelector('#team2_points').textContent = msg.teams[1].score
+
+        swapFaction($("#team1_name"), factions[parseInt(msg.teams[0].faction)])
+        swapFaction($("#team2_name"), factions[parseInt(msg.teams[1].faction)])
+
 
     }
 

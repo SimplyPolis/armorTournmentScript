@@ -1,0 +1,72 @@
+@charset "utf-8";
+@font-face {
+    font-family: "myFirstFont";
+    src: url("../static/big_noodle_titling.ttf") format('truetype');
+}
+
+.display {
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: "myFirstFont";
+    font-weight: bold;
+    font-size: 30px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.name {
+    display: inline-block;
+    position: relative;
+    width: 112px;
+    height: 94px;
+    margin-bottom: -33px;
+    z-index: 1;
+    color: white;
+    background-repeat: no-repeat;
+    text-align: center;
+    padding: 31px 0;
+
+}
+#time{
+    display: inline-block;
+    position: relative;
+    width: 112px;
+    height: 32px;
+    margin-bottom: -33px;
+    color: white;
+    background: darkgray;
+    text-align: center;
+    padding: 31px 0;
+}
+.points{
+      display: inline-block;
+    position: relative;
+    width: 112px;
+    height: 32px;
+    margin-bottom: -33px;
+    z-index: 1;
+    color: white;
+    background: darkgray;
+    text-align: center;
+    padding: 31px 0;
+
+}
+#team1_points{
+     border-bottom-left-radius: 40px;
+}
+#team2_points{
+     border-bottom-right-radius: 40px;
+}
+.NC {
+    background-image: url(../static/NC-ScoreBoard.png);
+
+}
+
+.TR {
+    background-image: url(../static/TR-ScoreBoard.png);
+
+}
+
+.VS {
+    background-image: url(../static/VS-ScoreBoard.png);
+}
