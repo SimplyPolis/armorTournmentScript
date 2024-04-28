@@ -40,7 +40,7 @@ game_task = None
 table_name = None
 connected_websockets = set()
 game_time = 900
-
+timer_task = None
 
 class Faction(enum.IntEnum):
     VS = 1
@@ -52,12 +52,15 @@ class Faction(enum.IntEnum):
 class Team:
     id_iter = itertools.count(start=0)
 
-    def __init__(self, name: str, members: dict[int:str], faction: Faction):
-        self.members = members
+    def __init__(self, name: str, faction: Faction):
+
         self.score = 0
         self.name = name
         self.faction = faction
         self.id = next(Team.id_iter)
+
+    def setMembers(self, members: dict[int:str]):
+        self.members = members
 
     def __eq__(self, other):
         if isinstance(other, Team):
@@ -78,13 +81,10 @@ class Team:
 
 
 class Game:
-    def __init__(self, teams: list[(str, dict[int:str], Faction)]):
+    def __init__(self, teams: list[(str, Faction)]):
         self.teams = [Team(*team) for team in teams]
         self.players = {}
         self.names = {}
-        for team in self.teams:
-            self.names.update(team.members)
-            self.players.update(team.getPlayers())
 
     def to_dict(self):
         return {"teams": [team.overlayAttributes() for team in self.teams]}
@@ -97,16 +97,15 @@ class Game:
             return None
         return self.teams[player]
 
-    @classmethod
-    async def initializeTeams(cls, teams: list[(str, list[str], Faction)]) -> Game:
-        teams_with_ids = []
+    async def initializePlayers(self, players: list[list[str]]):
         async with auraxium.Client(service_id='s:MEGABIGSTATS') as client:
-            for team in teams:
-                players = dict()
-                for player in team[1]:
-                    players.update({(await client.get_by_name(ps2.Character, player)).id: player})
-                teams_with_ids.append((team[0], players, team[2]))
-        return cls(teams_with_ids)
+            for team, team_members in zip(self.teams, players):
+                members = dict()
+                for member in team_members:
+                    members.update({(await client.get_by_name(ps2.Character, member)).id: member})
+                team.setMembers(members)
+                self.names.update(members)
+                self.players.update(team.getPlayers())
 
 
 async def gameLoop():
@@ -117,8 +116,6 @@ async def gameLoop():
     client = auraxium.event.EventClient(service_id='s:MEGABIGSTATS')
 
     await game_start_event.wait()
-    print("Ready")
-
     @client.trigger(event.VehicleDestroy, characters=game.players.keys())
     async def trackVehicleEvents(evt: event.VehicleDestroy):
         global cached_response
@@ -129,11 +126,8 @@ async def gameLoop():
         victim_team = game.findPlayer(victim_id)
         killer_vehicle = evt.attacker_vehicle_id
         victim_vehicle = evt.vehicle_id
-
-        # Ignore deaths not caused by enemy players
-
         if not victim_team or not killer_team or killer_id == 0 or victim_id == killer_id or points.get(
-                str(victim_vehicle), {"banned": True}) or points.get(str(killer_vehicle), {"banned": True}):
+                str(victim_vehicle), {"banned": True})["banned"] or points.get(str(killer_vehicle), {"banned": True})["banned"]:
             pass
         elif killer_team != victim_team:
             killer_team.scorePoints(points[str(victim_vehicle)]["points"])
@@ -152,9 +146,6 @@ async def gameLoop():
         await db.commit()
 
 
-
-
-
 def collect_websocket(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
@@ -165,13 +156,17 @@ def collect_websocket(func):
             return await func(queue, *args, **kwargs)
         finally:
             connected_websockets.remove(queue)
+
     return wrapper
 
 
 async def update_queue():
     global connected_websockets
     global cached_response
+    global timer_task
+    timer_task = asyncio.current_task()
     await game_start_event.wait()
+
     for i in range(game_time, -1, -1):
         await asyncio.sleep(1)
         async with cache_lock:
@@ -209,24 +204,28 @@ async def initializeGame():
             print(name)
             continue
         teams_dict.setdefault(match.group("id"), {}).update({match.group("field"): value})
-    game_list = []
+    team_list = []
     team_nums = list(teams_dict.keys())
     team_nums.sort()
-
+    players_list = []
     for key in team_nums:
-        game_list.append(
-            (teams_dict[key]["name"][0], teams_dict[key]["players"], Faction(int(teams_dict[key]["faction"][0]))))
+        team_list.append(
+            (teams_dict[key]["name"][0], Faction(int(teams_dict[key]["faction"][0]))))
+        players_list.append(teams_dict[key]["players"])
 
-    table_name = f"log_{str(datetime.datetime.now().timestamp()).replace('.', '')}"
-    await db.execute(
-        f"""CREATE TABLE {table_name} (
-        timestamp DATETIME,
-        killer TEXT,
-        victim TEXT,
-        killer_vehicle NUMERIC,
-        victim_vehicle NUMERIC,
-        gamestate TEXT)""")
-    game = await Game.initializeTeams(game_list)
+
+    if not game:
+        game = Game(team_list)
+        table_name = f"log_{str(datetime.datetime.now().timestamp()).replace('.', '')}"
+        await db.execute(
+            f"""CREATE TABLE {table_name} (
+                timestamp DATETIME,
+                killer TEXT,
+                victim TEXT,
+                killer_vehicle NUMERIC,
+                victim_vehicle NUMERIC,
+                gamestate TEXT)""")
+    await game.initializePlayers(players_list)
     for queue in connected_websockets:
         await queue.put(dict(game.to_dict(), **{"time": game_time}))
     initialize_event.set()
@@ -242,9 +241,13 @@ async def unInitialize():
 
 @app.route('/startGame', methods=["POST"])
 async def startGame():
+
     if not initialize_event.is_set():
         return jsonify(success=False)
+    req_dict = await request.form
     global cached_response
+    global game_time
+    game_time = int(req_dict["time_limit"])
     cached_response = game.to_dict()
     asyncio.create_task(update_queue())
     asyncio.create_task(gameLoop())
@@ -255,18 +258,28 @@ async def startGame():
 
 @app.route('/endGame', methods=["POST"])
 async def endGame():
-    initialize_event.clear()
     return jsonify(success=True) if endGameCallback() else jsonify(success=False)
+
+
+@app.route('/clearGame', methods=["POST"])
+async def clearGame():
+    global game
+    initialize_event.clear()
+    endGameCallback()
+    game=None
+    return jsonify(success=True)
 
 
 def endGameCallback() -> bool:
     global game_task
-    if not game_task:
-        if not game_task:
-            return False
-        game_task.cancel()
-        game_task = None
-        return True
+    global timer_task
+    if not game_task or not timer_task:
+        return False
+    game_task.cancel()
+    timer_task.cancel()
+    game_task = None
+    timer_task = None
+    return True
 
 
 async def openDB():

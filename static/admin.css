@@ -8,7 +8,15 @@
     background-color: rgba(0, 0, 0, 0);
     display: inline-block;
 
-}
-#team1{
 
+}
+.player_select{
+    height: 30em;
+overflow-y: scroll;
+}
+
+#match_control{
+    display: inline-block;
+    position: fixed;
+    right: 300px
 }

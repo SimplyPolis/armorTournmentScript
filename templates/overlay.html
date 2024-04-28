@@ -31,8 +31,7 @@
     }
 
 
-
-    const ws = new WebSocket(`ws://127.0.0.1:8080/ws`);
+    const ws = new WebSocket(`wss://${window.location.host}/ws`);
     ws.onmessage = (event) => {
         let msg = JSON.parse(event.data);
 
