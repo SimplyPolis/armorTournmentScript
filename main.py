@@ -193,6 +193,7 @@ async def overlay():
 async def initializeGame():
     if request.method == "GET":
         return await render_template("admin.html")
+
     global game
     global table_name
     global db
@@ -242,7 +243,7 @@ async def unInitialize():
 @app.route('/startGame', methods=["POST"])
 async def startGame():
 
-    if not initialize_event.is_set():
+    if not initialize_event.is_set() or game_start_event.is_set():
         return jsonify(success=False)
     req_dict = await request.form
     global cached_response
@@ -263,10 +264,6 @@ async def endGame():
 
 @app.route('/clearGame', methods=["POST"])
 async def clearGame():
-    global game
-    initialize_event.clear()
-    endGameCallback()
-    game=None
     return jsonify(success=True)
 
 
@@ -279,7 +276,10 @@ def endGameCallback() -> bool:
     timer_task.cancel()
     game_task = None
     timer_task = None
-    return True
+    initialize_event.clear()
+    game_start_event.clear()
+    return
+
 
 
 async def openDB():
